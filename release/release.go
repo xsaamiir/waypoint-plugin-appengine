@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sharkyze/waypoint-plugin-gae/registry"
 	"github.com/hashicorp/waypoint-plugin-sdk/terminal"
 )
 
@@ -67,7 +66,7 @@ func (rm *ReleaseManager) ReleaseFunc() interface{} {
 //
 // If an error is returned, Waypoint stops the execution flow and
 // returns an error to the user.
-func (rm *ReleaseManager) release(ctx context.Context, ui terminal.UI, artifact *registry.Artifact) (*Release, error) {
+func (rm *ReleaseManager) release(ctx context.Context, ui terminal.UI) (*Release, error) {
 	u := ui.Status()
 	defer u.Close()
 	u.Update("Release application")

@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/waypoint-plugin-sdk/terminal"
 )
 
-// Implement the Destroyer interface
+// DestroyFunc implements the Destroyer interface.
 func (p *Platform) DestroyFunc() interface{} {
 	return p.destroy
 }
