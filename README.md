@@ -2,6 +2,7 @@
 
 waypoint-plugin-gae is a deploy (platform & release) plugin for [Waypoint](https://github.com/hashicorp/waypoint). 
 It allows you to stage previously built zip artifcats to Google App Engine and then release the staged deployment and open it to general traffic.
+The plugin is only compatible with Google App Engine Standard Environment for the time being.
 
 **This plugin is still work in progress, please open an issue for any feedback or issues.**
 
@@ -20,14 +21,14 @@ This plugin uses GCP Application Default Credentials (ADC) for authentication. M
 
 # Configure
 ```hcl
-project = "project"
+project = "project-name"
 
 app "webapp" {
   path = "./webapp"
 
   build {
     use "archive" {
-      sources = ["src/", "public/", "package.json"] # Sources are relative to /path/to/project/webapp/
+      sources = ["src/", "public/", "package.json"] # Sources are relative to /path/to/project-name/webapp/
       output_name = "webapp.zip"
       overwrite_existing = true
     }
@@ -42,13 +43,17 @@ app "webapp" {
 
     deploy {
       use "gae" {
-        application = "gae-app-name"
+        project_id = "project_id"
         service = "api"
         runtime = "go114"
         instance_class = "F1"
+        automatic_scaling {
+          max_instances = 1
+        }
         main = "github.com/org/project/cmd/api"
         environment_variables = {
           "PORT": "8080"
+          "SECRET_NAME_DB_URL": "projects/project-name/secrets/postgres-url/versions/latest"
         }
       }
     }

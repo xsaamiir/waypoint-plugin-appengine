@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/waypoint-plugin-sdk/terminal"
@@ -12,17 +13,74 @@ import (
 )
 
 type DeployConfig struct {
-	Application string `hcl:"application"`
-	Service     string `hcl:"service"`
+	ProjectID string `hcl:"project_id"`
+	Service   string `hcl:"service"`
 	// Runtime: Desired runtime. Example: go114.
 	Runtime string `hcl:"runtime"`
 	// InstanceClass: Instance class that is used to run this version. Valid
 	// values are: AutomaticScaling: F1, F2, F4, F4_1G ManualScaling or
 	// BasicScaling: B1, B2, B4, B8, B4_1GDefaults to F1 for
 	// AutomaticScaling and B1 for ManualScaling or BasicScaling.
-	InstanceClass string            `hcl:"instance_class,optional"`
-	EnvVars       map[string]string `hcl:"environment_variables,optional"`
-	RuntimeMainExecutablePath string `hcl:main,optional`
+	InstanceClass             string            `hcl:"instance_class,optional"`
+	EnvVars                   map[string]string `hcl:"env_variables,optional"`
+	RuntimeMainExecutablePath string            `hcl:"main,optional"`
+	AutomaticScaling          *automaticScaling `hcl:"automatic_scaling,block"`
+}
+
+type automaticScaling struct {
+	// MaxConcurrentRequests: Number of concurrent requests an automatic
+	// scaling instance can accept before the scheduler spawns a new
+	// instance.Defaults to a runtime-specific value.
+	MaxConcurrentRequests int64 `hcl:"max_concurrent_requests,optional"`
+
+	// MaxIdleInstances: Maximum number of idle instances that should be
+	// maintained for this version.
+	MaxIdleInstances int64 `hcl:"max_idle_instances,optional"`
+
+	// MaxPendingLatency: Maximum amount of time that a request should wait
+	// in the pending queue before starting a new instance to handle it.
+	MaxPendingLatency string `hcl:"max_pending_latency,optional"`
+
+	// MaxInstances: Maximum number of instances to run for this version.
+	// Set to zero to disable max_instances configuration.
+	MaxInstances int64 `hcl:"max_instances,optional"`
+
+	// MinIdleInstances: Minimum number of idle instances that should be
+	// maintained for this version. Only applicable for the default version
+	// of a service.
+	MinIdleInstances int64 `hcl:"min_idle_instances,optional"`
+
+	// MinPendingLatency: Minimum amount of time a request should wait in
+	// the pending queue before starting a new instance to handle it.
+	MinPendingLatency string `hcl:"min_pending_latency,optional"`
+
+	// MinInstances: Minimum number of instances to run for this version.
+	// Set to zero to disable min_instances configuration.
+	MinInstances int64 `json:"min_instances,omitempty"`
+}
+
+func (a *automaticScaling) toAppEngine() *appengine.AutomaticScaling {
+	if a == nil {
+		return nil
+	}
+
+	return &appengine.AutomaticScaling{
+		MaxConcurrentRequests: a.MaxConcurrentRequests,
+		MaxIdleInstances:      a.MaxIdleInstances,
+		MaxPendingLatency:     a.MaxPendingLatency,
+		MinIdleInstances:      a.MinIdleInstances,
+		MinPendingLatency:     a.MinPendingLatency,
+		StandardSchedulerSettings: &appengine.StandardSchedulerSettings{
+			MaxInstances: a.MaxInstances,
+			MinInstances: a.MinInstances,
+		},
+	}
+}
+
+type Handlers struct {
+	URL    string `hcl:"url,optional"`
+	Script string `hcl:"script,optional"`
+	Secure string `hcl:"secure,optional"`
 }
 
 type Platform struct {
@@ -86,10 +144,15 @@ func (p *Platform) DeployFunc() interface{} {
 // as an input parameter.
 // If an error is returned, Waypoint stops the execution flow and
 // returns an error to the user.
-func (p *Platform) deploy(ctx context.Context, artifact *registry.Artifact, ui terminal.UI) (*Deployment, error) {
-	u := ui.Status()
-	defer u.Close()
-	u.Update("Deploying application '" + artifact.Source + "'")
+func (p *Platform) deploy(
+	ctx context.Context,
+	artifact *registry.Artifact,
+	ui terminal.UI,
+) (*Deployment, error) {
+	st := ui.Status()
+	defer st.Close()
+
+	st.Update("Deploying application '" + artifact.Source + "'")
 
 	appengineService, err := appengine.NewService(ctx)
 	if err != nil {
@@ -97,17 +160,17 @@ func (p *Platform) deploy(ctx context.Context, artifact *registry.Artifact, ui t
 	}
 
 	service := p.config.Service
-	appID := p.config.Application
+	projectID := p.config.ProjectID
 	versionID := time.Now().Format("20060102t150405")
+	sourceURL := artifact.Source
 	aev := appengine.Version{
 		ApiConfig:           nil,
-		AutomaticScaling:    nil,
+		AutomaticScaling:    p.config.AutomaticScaling.toAppEngine(),
 		BasicScaling:        nil,
 		BetaSettings:        nil,
 		BuildEnvVariables:   nil,
 		DefaultExpiration:   "",
-		Deployment:          &appengine.Deployment{Zip: &appengine.ZipInfo{SourceUrl: artifact.Source}},
-		DiskUsageBytes:      0,
+		Deployment:          &appengine.Deployment{Zip: &appengine.ZipInfo{SourceUrl: sourceURL}},
 		EndpointsApiService: nil,
 		Entrypoint:          nil,
 		Env:                 "standard",
@@ -127,33 +190,85 @@ func (p *Platform) deploy(ctx context.Context, artifact *registry.Artifact, ui t
 		Libraries:                 nil,
 		LivenessCheck:             nil,
 		ManualScaling:             nil,
-		Network:                   nil,
 		NobuildFilesRegex:         "",
 		ReadinessCheck:            nil,
-		Resources:                 nil,
 		Runtime:                   p.config.Runtime,
 		RuntimeApiVersion:         "",
 		RuntimeChannel:            "",
 		RuntimeMainExecutablePath: p.config.RuntimeMainExecutablePath,
 		ServingStatus:             "STOPPED",
-		Threadsafe:                false,
+		Threadsafe:                true,
 		Vm:                        false,
 		VpcAccessConnector:        nil,
-		ForceSendFields:           nil,
-		NullFields:                nil,
 	}
 
-	createCall := appengineService.Apps.Services.Versions.Create(appID, service, &aev)
+	st.Update("Creating new App Engine version '" + artifact.Source + "'")
+	createCall := appengineService.Apps.Services.Versions.Create(projectID, service, &aev)
 	createCall = createCall.Context(ctx)
+
 	op, err := createCall.Do()
 	if err != nil {
-		u.Step(terminal.StatusError, "Error creating new App Engine service version")
+		st.Step(terminal.StatusError, "Error creating new App Engine service version")
 		return nil, err
 	}
 
-	_ = op
+	opID := operationID(op.Name)
 
-	u.Step(terminal.StatusOK, "New service version created '"+versionID+"'")
+	st.Step(terminal.StatusOK, "App Engine version created '"+versionID+"'")
+	st.Update("Building new version on Cloud Build '" + opID + "'")
 
-	return &Deployment{}, nil
+	op, err = waitForOperation(ctx, appengineService, op)
+	if err != nil {
+		st.Step(terminal.StatusError, "Error fetching the version build status")
+		return nil, err
+	}
+
+	if op.Error != nil {
+		st.Step(terminal.StatusError, "Build error")
+		return nil, errors.New(op.Error.Message)
+	}
+
+	st.Step(terminal.StatusOK, "New service version created '"+versionID+"'")
+
+	return &Deployment{VersionId: versionID, ProjectId: projectID, Service: service}, nil
+}
+
+// operationID parses the operation id out of an operation name.
+func operationID(opName string) string {
+	// The operation opName has the format: apps/project-id/operations/op-id
+	split := strings.Split(opName, "/")
+	return split[len(split)-1]
+}
+
+// projectID parses the project id out of an operation name.
+func projectID(opName string) string {
+	// The operation name has the format: apps/project-id/operations/op-id
+	split := strings.Split(opName, "/")
+	return split[1]
+}
+
+// waitOnOperation keeps polling long the operation until it finishes either
+// successfully or with an error.
+func waitForOperation(
+	ctx context.Context,
+	service *appengine.APIService,
+	op *appengine.Operation,
+) (*appengine.Operation, error) {
+	opID := operationID(op.Name)
+	app := projectID(op.Name)
+
+	var err error
+
+	for !op.Done {
+		opCall := service.Apps.Operations.Get(app, opID)
+		opCall = opCall.Context(ctx)
+		op, err = opCall.Do()
+		if err != nil {
+			return nil, err
+		}
+
+		time.Sleep(2 * time.Second)
+	}
+
+	return op, nil
 }
