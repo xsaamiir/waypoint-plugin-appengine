@@ -1,4 +1,4 @@
-package platform
+package gae
 
 import (
 	"testing"

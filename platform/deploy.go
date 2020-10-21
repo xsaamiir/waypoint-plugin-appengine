@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/waypoint-plugin-sdk/terminal"
 	"github.com/sharkyze/waypoint-plugin-gcs/registry"
 	"google.golang.org/api/appengine/v1"
+
+	"github.com/sharkyze/waypoint-plugin-gae/internal/gae"
 )
 
 type DeployConfig struct {
@@ -212,12 +213,10 @@ func (p *Platform) deploy(
 		return nil, err
 	}
 
-	opID := operationID(op.Name)
-
 	st.Step(terminal.StatusOK, "App Engine version created '"+versionID+"'")
-	st.Update("Building new version on Cloud Build '" + opID + "'")
+	st.Update("Building new version on Cloud Build '" + op.Name + "'")
 
-	op, err = waitForOperation(ctx, appengineService, op)
+	op, err = gae.WaitForOperation(ctx, appengineService, op)
 	if err != nil {
 		st.Step(terminal.StatusError, "Error fetching the version build status")
 		return nil, err
@@ -231,44 +230,4 @@ func (p *Platform) deploy(
 	st.Step(terminal.StatusOK, "New service version created '"+versionID+"'")
 
 	return &Deployment{VersionId: versionID, ProjectId: projectID, Service: service}, nil
-}
-
-// operationID parses the operation id out of an operation name.
-func operationID(opName string) string {
-	// The operation opName has the format: apps/project-id/operations/op-id
-	split := strings.Split(opName, "/")
-	return split[len(split)-1]
-}
-
-// projectID parses the project id out of an operation name.
-func projectID(opName string) string {
-	// The operation name has the format: apps/project-id/operations/op-id
-	split := strings.Split(opName, "/")
-	return split[1]
-}
-
-// waitOnOperation keeps polling long the operation until it finishes either
-// successfully or with an error.
-func waitForOperation(
-	ctx context.Context,
-	service *appengine.APIService,
-	op *appengine.Operation,
-) (*appengine.Operation, error) {
-	opID := operationID(op.Name)
-	app := projectID(op.Name)
-
-	var err error
-
-	for !op.Done {
-		opCall := service.Apps.Operations.Get(app, opID)
-		opCall = opCall.Context(ctx)
-		op, err = opCall.Do()
-		if err != nil {
-			return nil, err
-		}
-
-		time.Sleep(2 * time.Second)
-	}
-
-	return op, nil
 }
