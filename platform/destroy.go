@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/waypoint-plugin-sdk/terminal"
 	"google.golang.org/api/appengine/v1"
 
-	"github.com/sharkyze/waypoint-plugin-gae/internal/gae"
+	"github.com/sharkyze/waypoint-plugin-appengine/internal/appengineutil"
 )
 
 // DestroyFunc implements the Destroyer interface.
@@ -70,7 +70,7 @@ func (p *Platform) destroy(ctx context.Context, ui terminal.UI, deployment *Depl
 		return err
 	}
 
-	op, err = gae.WaitForOperation(ctx, appengineService, op)
+	op, err = appengineutil.WaitForOperation(ctx, appengineService, op)
 	if err != nil {
 		st.Step(terminal.StatusError, "Error fetching delete operation status")
 		return err

@@ -1,6 +1,6 @@
-PLUGIN_NAME=gae
+PLUGIN_NAME=appengine
 
-all: protos build
+all: protos build install
 
 protos:
 	@echo ""

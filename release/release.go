@@ -8,8 +8,8 @@ import (
 	"github.com/hashicorp/waypoint-plugin-sdk/terminal"
 	"google.golang.org/api/appengine/v1"
 
-	"github.com/sharkyze/waypoint-plugin-gae/internal/gae"
-	"github.com/sharkyze/waypoint-plugin-gae/platform"
+	"github.com/sharkyze/waypoint-plugin-appengine/internal/appengineutil"
+	"github.com/sharkyze/waypoint-plugin-appengine/platform"
 )
 
 type ReleaseConfig struct{}
@@ -99,7 +99,7 @@ func (rm *ReleaseManager) release(
 		return nil, err
 	}
 
-	op, err = gae.WaitForOperation(ctx, appengineService, op)
+	op, err = appengineutil.WaitForOperation(ctx, appengineService, op)
 	if err != nil {
 		return nil, err
 	}

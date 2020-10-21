@@ -2,8 +2,9 @@ package main
 
 import (
 	sdk "github.com/hashicorp/waypoint-plugin-sdk"
-	"github.com/sharkyze/waypoint-plugin-gae/platform"
-	"github.com/sharkyze/waypoint-plugin-gae/release"
+
+	"github.com/sharkyze/waypoint-plugin-appengine/platform"
+	"github.com/sharkyze/waypoint-plugin-appengine/release"
 )
 
 func main() {

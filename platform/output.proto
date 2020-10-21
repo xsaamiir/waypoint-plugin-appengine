@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package platform;
 
-option go_package = "github.com/sharkyze/waypoint-plugin-gae/platform";
+option go_package = "github.com/sharkyze/waypoint-plugin-appengine/platform";
 
 // You can customise this message to change the fields for
 // the output value from your Deployment

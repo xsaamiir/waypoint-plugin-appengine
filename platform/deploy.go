@@ -10,7 +10,7 @@ import (
 	"github.com/sharkyze/waypoint-plugin-gcs/registry"
 	"google.golang.org/api/appengine/v1"
 
-	"github.com/sharkyze/waypoint-plugin-gae/internal/gae"
+	"github.com/sharkyze/waypoint-plugin-appengine/internal/appengineutil"
 )
 
 type DeployConfig struct {
@@ -216,7 +216,7 @@ func (p *Platform) deploy(
 	st.Step(terminal.StatusOK, "App Engine version created '"+versionID+"'")
 	st.Update("Building new version on Cloud Build '" + op.Name + "'")
 
-	op, err = gae.WaitForOperation(ctx, appengineService, op)
+	op, err = appengineutil.WaitForOperation(ctx, appengineService, op)
 	if err != nil {
 		st.Step(terminal.StatusError, "Error fetching the version build status")
 		return nil, err

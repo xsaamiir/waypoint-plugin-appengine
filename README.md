@@ -1,6 +1,6 @@
 # Waypoint Plugin Google App Engine
 
-waypoint-plugin-gae is a deploy (platform & release) plugin for [Waypoint](https://github.com/hashicorp/waypoint). 
+waypoint-plugin-appengine is a deploy (platform & release) plugin for [Waypoint](https://github.com/hashicorp/waypoint). 
 It allows you to stage previously built zip artifcats to Google App Engine and then release the staged deployment and open it to general traffic.
 The plugin is only compatible with Google App Engine Standard Environment for the time being.
 
@@ -10,12 +10,12 @@ The plugin is only compatible with Google App Engine Standard Environment for th
 To install the plugin, run the following command:
 
 ````bash
-git clone git@github.com:sharkyze/waypoint-plugin-gae.git # or gh repo clone sharkyze/waypoint-plugin-gae
-cd waypoint-plugin-gae
+git clone git@github.com:sharkyze/waypoint-plugin-appengine.git # or gh repo clone sharkyze/waypoint-plugin-appengine
+cd waypoint-plugin-appengine
 make install
 ````
 
-# GAE Authentication
+# Google App Engine Authentication
 Please follow the instructions in the [Google Cloud Run tutorial](https://learn.hashicorp.com/tutorials/waypoint/google-cloud-run?in=waypoint/deploy-google-cloud#authenticate-to-google-cloud).
 This plugin uses GCP Application Default Credentials (ADC) for authentication. More info [here](https://cloud.google.com/docs/authentication/production).
 
@@ -48,7 +48,7 @@ app "webapp" {
     }
 
     deploy {
-      use "gae" {
+      use "appengine" {
         project_id = "project_id"
         service = "api"
         runtime = "go114"
@@ -65,7 +65,7 @@ app "webapp" {
     }
     
     release {
-      use "gae" {}
+      use "appengine" {}
     }
   }
 }
