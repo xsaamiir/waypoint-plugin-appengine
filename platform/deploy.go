@@ -14,8 +14,8 @@ import (
 )
 
 type DeployConfig struct {
-	ProjectID string `hcl:"project_id"`
-	Service   string `hcl:"service"`
+	Project string `hcl:"project"`
+	Service string `hcl:"service"`
 	// Runtime: Desired runtime. Example: go114.
 	Runtime string `hcl:"runtime"`
 	// InstanceClass: Instance class that is used to run this version. Valid
@@ -161,7 +161,7 @@ func (p *Platform) deploy(
 	}
 
 	service := p.config.Service
-	projectID := p.config.ProjectID
+	project := p.config.Project
 	versionID := time.Now().Format("20060102t150405")
 	sourceURL := artifact.Source
 	aev := appengine.Version{
@@ -204,7 +204,7 @@ func (p *Platform) deploy(
 	}
 
 	st.Update("Creating new App Engine version '" + artifact.Source + "'")
-	createCall := appengineService.Apps.Services.Versions.Create(projectID, service, &aev)
+	createCall := appengineService.Apps.Services.Versions.Create(project, service, &aev)
 	createCall = createCall.Context(ctx)
 
 	op, err := createCall.Do()
@@ -229,5 +229,5 @@ func (p *Platform) deploy(
 
 	st.Step(terminal.StatusOK, "New service version created '"+versionID+"'")
 
-	return &Deployment{VersionId: versionID, ProjectId: projectID, Service: service}, nil
+	return &Deployment{VersionId: versionID, Project: project, Service: service}, nil
 }

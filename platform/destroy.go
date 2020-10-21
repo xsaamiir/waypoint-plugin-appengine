@@ -46,13 +46,13 @@ func (p *Platform) destroy(ctx context.Context, ui terminal.UI, deployment *Depl
 	st := ui.Status()
 	defer st.Close()
 
-	projectID := deployment.ProjectId
+	project := deployment.Project
 	service := deployment.Service
 	versionID := deployment.VersionId
 
 	st.Update(
 		"Deleting App Engine version '" +
-			"apps/" + projectID + "/services/" + service + "/versions/" + versionID +
+			"apps/" + project + "/services/" + service + "/versions/" + versionID +
 			"'",
 	)
 
@@ -61,7 +61,7 @@ func (p *Platform) destroy(ctx context.Context, ui terminal.UI, deployment *Depl
 		return err
 	}
 
-	deleteCall := appengineService.Apps.Services.Versions.Delete(projectID, service, versionID)
+	deleteCall := appengineService.Apps.Services.Versions.Delete(project, service, versionID)
 
 	deleteCall = deleteCall.Context(ctx)
 	op, err := deleteCall.Do()

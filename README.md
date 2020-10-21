@@ -49,7 +49,7 @@ app "webapp" {
 
     deploy {
       use "appengine" {
-        project_id = "project_id"
+        project = "project_id"
         service = "api"
         runtime = "go114"
         instance_class = "F1"

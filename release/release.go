@@ -77,7 +77,7 @@ func (rm *ReleaseManager) release(
 	st := ui.Status()
 	defer st.Close()
 
-	projectID := deployment.ProjectId
+	project := deployment.Project
 	service := deployment.Service
 	versionID := deployment.VersionId
 
@@ -88,7 +88,7 @@ func (rm *ReleaseManager) release(
 		return nil, err
 	}
 
-	servicePatchCall := appengineService.Apps.Services.Patch(projectID, service, &appengine.Service{
+	servicePatchCall := appengineService.Apps.Services.Patch(project, service, &appengine.Service{
 		Split: &appengine.TrafficSplit{Allocations: map[string]float64{versionID: 1}},
 	})
 	servicePatchCall.UpdateMask("split")

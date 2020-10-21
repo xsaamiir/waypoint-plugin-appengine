@@ -9,6 +9,6 @@ option go_package = "github.com/sharkyze/waypoint-plugin-appengine/platform";
 // the output value from your Deployment
 message Deployment {
   string version_id = 1;
-  string project_id = 2;
+  string project = 2;
   string service = 3;
 }

@@ -222,6 +222,8 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/sergi/go-diff v1.0.0 h1:Kpca3qRNrduNnOQeazBd0ysaKrUJiIuISHxogkT9RPQ=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
+github.com/sharkyze/waypoint-plugin-archive v0.0.0-20201021192932-15308bd831a4 h1:Gmjk70WUiqpOniU3QP8ziIZF3PUVmN5+VgDYuYqcxZ0=
+github.com/sharkyze/waypoint-plugin-archive v0.0.0-20201021192932-15308bd831a4/go.mod h1:yFD20DcmBFY98D/jS/JRdeuk8Ltb31C/2x/qNkkA3zM=
 github.com/sharkyze/waypoint-plugin-cloudstorage v0.0.0-20201021192251-388457b50efd h1:r8uhcEjImhvYQlgiBczO2+4u9PKiy2GcVXsLJRBOhys=
 github.com/sharkyze/waypoint-plugin-cloudstorage v0.0.0-20201021192251-388457b50efd/go.mod h1:iIcznMo/iYNY0YzC53JfUXwcB5msVxMg7vNzPrBBoOs=
 github.com/spf13/pflag v1.0.2/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
