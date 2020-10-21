@@ -40,7 +40,7 @@ app "webapp" {
     }
 
     registry {
-      use "gcs" {
+      use "cloudstorage" {
         source = "webapp.zip"
         name = "artifcats/webapp/${gitrefpretty()}.zip"
         bucket = "staging.project-name.appspot.com"

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/waypoint-plugin-sdk/terminal"
-	"github.com/sharkyze/waypoint-plugin-gcs/registry"
+	"github.com/sharkyze/waypoint-plugin-cloudstorage/registry"
 	"google.golang.org/api/appengine/v1"
 
 	"github.com/sharkyze/waypoint-plugin-appengine/internal/appengineutil"
