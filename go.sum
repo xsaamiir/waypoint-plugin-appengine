@@ -160,6 +160,8 @@ github.com/hashicorp/hcl/v2 v2.6.0 h1:3krZOfGY6SziUXa6H9PJU6TyohHn7I+ARYnhbeNBz+
 github.com/hashicorp/hcl/v2 v2.6.0/go.mod h1:bQTN5mpo+jewjJgh8jr0JUguIi7qPHUF6yIfAEN3jqY=
 github.com/hashicorp/waypoint-plugin-sdk v0.0.0-20201016002013-59421183d54f h1:UaeSZwPNp+Lm3ettv+UiViVjO2YTogkCziPVk+9q+Og=
 github.com/hashicorp/waypoint-plugin-sdk v0.0.0-20201016002013-59421183d54f/go.mod h1:TAzCz7NdqFM9KnxR5GdOttWKmG05qeE8xeOFFjX72UQ=
+github.com/hashicorp/waypoint-plugin-sdk v0.0.0-20201021094150-1b1044b1478e h1:xsrV6giEgkg+txdFgAXoiSrSk6DIy/t5JQtkJj51bio=
+github.com/hashicorp/waypoint-plugin-sdk v0.0.0-20201021094150-1b1044b1478e/go.mod h1:TAzCz7NdqFM9KnxR5GdOttWKmG05qeE8xeOFFjX72UQ=
 github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb h1:b5rjCoWHc7eqmAS4/qyk21ZsHyb6Mxv/jykxvNTkU4M=
 github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
@@ -220,8 +222,8 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/sergi/go-diff v1.0.0 h1:Kpca3qRNrduNnOQeazBd0ysaKrUJiIuISHxogkT9RPQ=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
-github.com/sharkyze/waypoint-plugin-cloudstorage v0.0.0-20201021112316-435f962cd004 h1:vErKtWqX+WEXwRHyRK1vIiQpOqjOvTMFrwgBnnMtlss=
-github.com/sharkyze/waypoint-plugin-cloudstorage v0.0.0-20201021112316-435f962cd004/go.mod h1:iIcznMo/iYNY0YzC53JfUXwcB5msVxMg7vNzPrBBoOs=
+github.com/sharkyze/waypoint-plugin-cloudstorage v0.0.0-20201021192251-388457b50efd h1:r8uhcEjImhvYQlgiBczO2+4u9PKiy2GcVXsLJRBOhys=
+github.com/sharkyze/waypoint-plugin-cloudstorage v0.0.0-20201021192251-388457b50efd/go.mod h1:iIcznMo/iYNY0YzC53JfUXwcB5msVxMg7vNzPrBBoOs=
 github.com/spf13/pflag v1.0.2/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0 h1:Hbg2NidpLE8veEBkEZTL3CvlkUIVzuU9jDplZO54c48=
