@@ -38,13 +38,13 @@ type handler struct {
 	Upload      string            `hcl:"upload,optional"`
 }
 
-type handlers []*handler
+type handlers []handler
 
 // toAE converts data to the format expected by the appengine client.
-func (a handlers) toAE() []*appengine.UrlMap {
-	ums := make([]*appengine.UrlMap, len(a))
+func (h handlers) toAE() []*appengine.UrlMap {
+	ums := make([]*appengine.UrlMap, len(h))
 
-	for i, handler := range a {
+	for i, handler := range h {
 		var script *appengine.ScriptHandler
 		if s := handler.Script; s != "" {
 			script = &appengine.ScriptHandler{ScriptPath: s}
