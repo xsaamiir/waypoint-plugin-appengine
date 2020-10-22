@@ -26,6 +26,56 @@ type DeployConfig struct {
 	EnvVars                   map[string]string `hcl:"env_variables,optional"`
 	RuntimeMainExecutablePath string            `hcl:"main,optional"`
 	AutomaticScaling          *automaticScaling `hcl:"automatic_scaling,block"`
+	Handlers                  handlers          `hcl:"handlers,block"`
+}
+
+type handler struct {
+	URL         string            `hcl:"url"`
+	Script      string            `hcl:"script,optional"`
+	Secure      string            `hcl:"secure,optional"`
+	HTTPHeaders map[string]string `hcl:"http_headers,optional"`
+	StaticFiles string            `hcl:"static_files,optional"`
+	Upload      string            `hcl:"upload,optional"`
+}
+
+type handlers []*handler
+
+// toAE converts data to the format expected by the appengine client.
+func (a handlers) toAE() []*appengine.UrlMap {
+	ums := make([]*appengine.UrlMap, len(a))
+
+	for i, handler := range a {
+		var script *appengine.ScriptHandler
+		if s := handler.Script; s != "" {
+			script = &appengine.ScriptHandler{ScriptPath: s}
+		}
+
+		var sfs *appengine.StaticFilesHandler
+		if handler.StaticFiles != "" || handler.Upload != "" {
+			sfs = &appengine.StaticFilesHandler{
+				ApplicationReadable: false,
+				Expiration:          "",
+				HttpHeaders:         handler.HTTPHeaders,
+				MimeType:            "",
+				Path:                handler.StaticFiles,
+				RequireMatchingFile: false,
+				UploadPathRegex:     handler.Upload,
+			}
+		}
+
+		ums[i] = &appengine.UrlMap{
+			ApiEndpoint:              nil,
+			AuthFailAction:           "",
+			Login:                    "",
+			RedirectHttpResponseCode: "",
+			Script:                   script,
+			SecurityLevel:            handler.Secure,
+			StaticFiles:              sfs,
+			UrlRegex:                 handler.URL,
+		}
+	}
+
+	return ums
 }
 
 type automaticScaling struct {
@@ -60,7 +110,8 @@ type automaticScaling struct {
 	MinInstances int64 `json:"min_instances,omitempty"`
 }
 
-func (a *automaticScaling) toAppEngine() *appengine.AutomaticScaling {
+// toAE converts data to the format expected by the appengine client.
+func (a *automaticScaling) toAE() *appengine.AutomaticScaling {
 	if a == nil {
 		return nil
 	}
@@ -153,7 +204,7 @@ func (p *Platform) deploy(
 	st := ui.Status()
 	defer st.Close()
 
-	st.Update("Deploying application '" + artifact.Source + "'")
+	st.Update("Creating new App Engine version '" + artifact.Source + "'")
 
 	appengineService, err := appengine.NewService(ctx)
 	if err != nil {
@@ -164,26 +215,21 @@ func (p *Platform) deploy(
 	project := p.config.Project
 	versionID := time.Now().Format("20060102t150405")
 	sourceURL := artifact.Source
+
 	aev := appengine.Version{
-		ApiConfig:           nil,
-		AutomaticScaling:    p.config.AutomaticScaling.toAppEngine(),
-		BasicScaling:        nil,
-		BetaSettings:        nil,
-		BuildEnvVariables:   nil,
-		DefaultExpiration:   "",
-		Deployment:          &appengine.Deployment{Zip: &appengine.ZipInfo{SourceUrl: sourceURL}},
-		EndpointsApiService: nil,
-		Entrypoint:          nil,
-		Env:                 "standard",
-		EnvVariables:        p.config.EnvVars,
-		ErrorHandlers:       nil,
-		Handlers: []*appengine.UrlMap{
-			{
-				Script:        &appengine.ScriptHandler{ScriptPath: "auto"},
-				SecurityLevel: "SECURE_ALWAYS",
-				UrlRegex:      "/.*",
-			},
-		},
+		ApiConfig:                 nil,
+		AutomaticScaling:          p.config.AutomaticScaling.toAE(),
+		BasicScaling:              nil,
+		BetaSettings:              nil,
+		BuildEnvVariables:         nil,
+		DefaultExpiration:         "",
+		Deployment:                &appengine.Deployment{Zip: &appengine.ZipInfo{SourceUrl: sourceURL}},
+		EndpointsApiService:       nil,
+		Entrypoint:                nil,
+		Env:                       "standard",
+		EnvVariables:              p.config.EnvVars,
+		ErrorHandlers:             nil,
+		Handlers:                  p.config.Handlers.toAE(),
 		HealthCheck:               nil,
 		Id:                        versionID,
 		InboundServices:           nil,
@@ -203,7 +249,6 @@ func (p *Platform) deploy(
 		VpcAccessConnector:        nil,
 	}
 
-	st.Update("Creating new App Engine version '" + artifact.Source + "'")
 	createCall := appengineService.Apps.Services.Versions.Create(project, service, &aev)
 	createCall = createCall.Context(ctx)
 
