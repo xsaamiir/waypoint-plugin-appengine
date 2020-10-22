@@ -225,7 +225,7 @@ func (p *Platform) deploy(
 		DefaultExpiration:         "",
 		Deployment:                &appengine.Deployment{Zip: &appengine.ZipInfo{SourceUrl: sourceURL}},
 		EndpointsApiService:       nil,
-		Entrypoint:                nil,
+		Entrypoint:                &appengine.Entrypoint{Shell: "", ForceSendFields: []string{"Shell"}},
 		Env:                       "standard",
 		EnvVariables:              p.config.EnvVars,
 		ErrorHandlers:             nil,
